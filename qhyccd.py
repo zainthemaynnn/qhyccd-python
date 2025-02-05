@@ -98,6 +98,11 @@ class qhyccd():
             self.imgdata = (ctypes.c_uint8 * roi_w * roi_h)()
             self.sdk.SetQHYCCDResolution(self.cam, x0, y0, self.roi_w, self.roi_h)
 
+    """Set camera auto-cooling target temperature
+    Note: to use auto-cooling, you need to call this every second"""
+    def SetCooling(self, temp):
+        self.sdk.SetQHYCCDParam(self.cam, CONTROL_ID.CONTROL_COOLER, c_double(temp))
+
     """ Exposure and return single frame """
     def GetSingleFrame(self):
         ret = self.sdk.ExpQHYCCDSingleFrame(self.cam)
@@ -105,13 +110,20 @@ class qhyccd():
             self.cam, byref(self.roi_w), byref(self.roi_h), byref(self.bpp),
             byref(self.channels), self.imgdata)
         return np.asarray(self.imgdata) #.reshape([self.roi_h.value, self.roi_w.value])
-   
+
+    """Get camera temperature"""
+    def GetCurrTemp(self):
+        return self.sdk.GetQHYCCDParam(self.cam, CONTROL_ID.CONTROL_CURTEMP)
+
+    """Get camera fan speed"""
+    def GetCurrFanSpeed(self):
+        return self.sdk.GetQHYCCDParam(self.cam, CONTROL_ID.CONTROL_CURPWM)
 
     def BeginLive(self):
         """ Begin live mode"""
         #self.sdk.SetQHYCCDStreamMode(self.cam, 1)  # Live mode
         self.sdk.BeginQHYCCDLive(self.cam)
-    
+
     def GetLiveFrame(self):
         """ Return live image """
         self.sdk.GetQHYCCDLiveFrame(self.cam, byref(self.roi_h), byref(self.roi_w), 
