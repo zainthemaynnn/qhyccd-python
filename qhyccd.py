@@ -3,7 +3,7 @@ import ctypes
 from ctypes import *
 import numpy as np
 import time
-from libqhy import *
+from .libqhy import *
 
 """
 Basic functions to control qhyccd camera
@@ -17,12 +17,12 @@ Basic functions to control qhyccd camera
 class qhyccd():
     def __init__(self):
         # create sdk handle
-        self.sdk= CDLL('/usr/local/lib/libqhyccd.so')
+        self.sdk= CDLL('C:/Program Files/qhyccd/x64/qhyccd.dll')
         #self.sdk= CDLL('/usr/lib64/libqhyccd.so')
         self.sdk.GetQHYCCDParam.restype = c_double
         self.sdk.OpenQHYCCD.restype = ctypes.POINTER(c_uint32)
         # ref: https://www.qhyccd.com/bbs/index.php?topic=6356.0
-        self.mode = 1 # set default mode to stream mode, otherwise set 0 for single frame mode
+        self.mode = 0 # set default mode to stream mode, otherwise set 0 for single frame mode
         self.bpp = c_uint(8) # 8 bit
         self.exposureMS = 100 # 100ms
         self.connect(self.mode)
@@ -74,8 +74,8 @@ class qhyccd():
         # sdk exposure uses us as unit
         self.exposureMS = exposureMS # input ms
         self.sdk.SetQHYCCDParam(self.cam, CONTROL_ID.CONTROL_EXPOSURE, c_double(exposureMS*1000))
-        print("Set exposure to", 
-                self.sdk.GetQHYCCDParam(self.cam, CONTROL_ID.CONTROL_EXPOSURE)/1000)
+        # print("Set exposure to", 
+                # self.sdk.GetQHYCCDParam(self.cam, CONTROL_ID.CONTROL_EXPOSURE)/1000)
 
     """ Set camera gain """
     def SetGain(self, gain):
